@@ -102,6 +102,51 @@ float noise(vec2 p){
 }
 float fbm(vec2 p){ float a = .5, s = 0.; for (int i = 0; i < 5; i++) { s += a * noise(p); p = p * 2.03 + vec2(17.1, 9.2); a *= .5; } return s; }
 
+/* Where the sun is. */
+const vec3 SUN = vec3(-.72, -.38, .58);
+
+/** One meteor: a white-hot head, an orange tail cooling to red, and a soft glow around it. */
+vec3 streak(vec2 rel, vec2 dir, float len, float size, out float glow){
+  float along = dot(rel, -dir);
+  float perp = dot(rel, vec2(-dir.y, dir.x));
+  float k = clamp(along / len, 0., 1.);
+  float behind = step(0., along);
+  float width = mix(.0026, .0007, k) * size;
+  float tail = behind * (1. - k) * (1. - k) * exp(-perp * perp / (width * width));
+  float hd = length(rel);
+  float core = exp(-hd * hd / (.000012 * size * size));
+  glow = exp(-hd * 26. / size) * .5 + behind * (1. - k) * exp(-abs(perp) * 90. / size) * .22;
+  return mix(vec3(1., .78, .42), vec3(1., .26, .03), k) * tail * 1.5 + vec3(1., .94, .8) * core * 1.6 + vec3(1., .42, .08) * glow;
+}
+
+/**
+ * Meteors: a few slots, each firing one streak per cycle, falling down and to the left.
+ * The far ones start along the top of the sky and end up behind the planet. The near ones are
+ * larger, start anywhere on screen and pass in front of it, so there is always something to see
+ * however far the page has scrolled. w is the glow alone, for lighting the smoke.
+ */
+vec3 meteors(vec2 q, float aspect, float t, float near, out float w){
+  vec3 sum = vec3(0.); w = 0.;
+  for (int i = 0; i < 5; i++) {
+    float fi = float(i), id = fi + near * 20.;
+    float period = mix(5., 6., near) + fi * mix(2.4, 3., near);
+    float clock = t / period + fi * .37 + near * .19;
+    float cycle = floor(clock);
+    float life = fract(clock) * period / (1.1 + hash(vec2(cycle, id + 3.)) * .6);
+    if (life > 1.) continue;
+    float r1 = hash(vec2(cycle, id)), r2 = hash(vec2(id + 7., cycle)), r3 = hash(vec2(cycle + 2., id + 5.));
+    vec2 dir = normalize(vec2(-1., .34 + r3 * .36));
+    vec2 start = near > .5 ? vec2((.2 + r1 * 1.15) * aspect, -.1 + r2 * .8) : vec2((.22 + r1 * .62) * aspect, -.1 + r2 * .22);
+    float size = near > .5 ? 1.4 + r3 * .7 : 1.;
+    vec2 head = start + dir * life * (.75 + r3 * .5) * mix(1., 1.25, near);
+    float env = smoothstep(0., .12, life) * (1. - smoothstep(.6, 1., life));
+    float g;
+    sum += env * streak(q - head, dir, (.22 + r2 * .2) * size, size, g);
+    w += env * g;
+  }
+  return sum;
+}
+
 void main(){
   vec2 p = vec2(vUv.x, 1. - vUv.y) * uRes;
   vec2 q = p / uRes.y;
@@ -162,7 +207,7 @@ void main(){
     float k = clamp(r / R, 0., 1.);
     float z = sqrt(1. - k * k);
     vec3 N = vec3(d / R, z);
-    vec3 L = normalize(vec3(-.72, -.38, .58));
+    vec3 L = normalize(SUN);
     float lit = max(dot(N, L), 0.);
     // Cloud bands wrapped onto the sphere (they compress toward the limb).
     float clouds = fbm(d / R * 1.8 / (.55 + z) + vec2(t * .012, 0.));
@@ -174,6 +219,11 @@ void main(){
     float side = .25 + .75 * max(dot(normalize(d), normalize(L.xy)), 0.);
     float halo = exp(-max(r - R, 0.) * 11.) * (1. - disc);
     col += star * (1. - disc) * .8;
+    // Far meteors pass behind the planet, and flare where they cross its atmosphere.
+    float aspect = uRes.x / uRes.y;
+    float mGlow, nearGlow;
+    vec3 met = meteors(q + vec2(0., uScroll * .00006), aspect, t, 0., mGlow);
+    col += met * (1. - disc) * (1. + halo * 2.2);
     col = mix(col, body, disc);
     col += vec3(.14, .44, 1.) * halo * side * .95;
     col += vec3(.5, .85, 1.) * smoothstep(.012, 0., abs(r - R)) * side * .55;
@@ -184,6 +234,13 @@ void main(){
     float n2 = fbm(uv * 2.6 + n1 * 1.7 + vec2(-t * .04, t * .03));
     col = mix(col, vec3(.10, .30, .78), smoothstep(.38, .9, n2) * .5);
     col += vec3(.10, .22, .5) * smoothstep(.55, .95, n1) * .35;
+    // The smoke nearest a meteor picks up its orange.
+    col += vec3(1., .4, .08) * mGlow * (1. - disc) * smoothstep(.3, .9, n2) * .6;
+
+    // In front of the planet and the smoke: the near meteors. These keep to the screen,
+    // not the page, so they are there at any scroll position.
+    col += meteors(q, aspect, t, 1., nearGlow);
+    col += vec3(1., .4, .08) * nearGlow * smoothstep(.3, .9, n2) * .5;
     night = vec4(col, 1.);
   }
 
