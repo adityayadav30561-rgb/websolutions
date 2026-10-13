@@ -59,12 +59,12 @@ function PageTour({ p, title = "Down the page" }: { p: WebProject | SeoProject; 
   const { desktop, mobile } = sitePages(p);
   return (
     <Section title={title} note="Six stops from the top of the desktop page to the bottom, then four on a phone.">
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+      <div className="swipe-row grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
         {DESKTOP_STOPS.map((at) => (
           <Crop key={at} src={desktop} at={at} alt={`${p.name} desktop page, ${at}% down`} ratio="aspect-[16/10]" />
         ))}
       </div>
-      <div className="mt-5 grid grid-cols-2 gap-5 md:grid-cols-4">
+      <div className="swipe-row swipe-narrow mt-5 grid grid-cols-2 gap-5 md:grid-cols-4">
         {PHONE_STOPS.map((at) => (
           <Crop key={at} src={mobile} at={at} alt={`${p.name} on a phone, ${at}% down`} ratio="aspect-[9/16]" />
         ))}
@@ -181,7 +181,7 @@ function AppSections({ p }: { p: AppProject }) {
               <h3 className="mt-2 text-[clamp(1.5rem,2.2vw,2rem)] font-semibold leading-none tracking-[-0.03em]">{flow.title}</h3>
               <p className="mt-4 text-[0.9375rem] leading-relaxed text-b-mute lg:max-w-xs">{flow.text}</p>
             </div>
-            <ul className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 lg:col-span-9 lg:grid-cols-4 xl:grid-cols-5">
+            <ul className="swipe-row swipe-narrow grid grid-cols-2 gap-x-5 gap-y-8 md:grid-cols-3 lg:col-span-9 lg:grid-cols-4 xl:grid-cols-5">
               {flow.shots.map((shot) => (
                 <motion.li key={shot.file} {...reveal}>
                   <PhoneFrame>

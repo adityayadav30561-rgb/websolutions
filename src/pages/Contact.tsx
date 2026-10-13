@@ -194,7 +194,7 @@ export default function Contact() {
             <h2 className="max-w-3xl text-[clamp(2rem,4.2vw,3.6rem)]">What happens next.</h2>
             <p className="max-w-xs text-[0.9375rem] leading-relaxed text-b-mute">From your message to a quote you can say yes or no to.</p>
           </div>
-          <ol className="grid grid-cols-1 gap-5 md:grid-cols-3">
+          <ol className="swipe-row grid grid-cols-1 gap-5 md:grid-cols-3">
             {nextSteps.map((s, i) => (
               <li key={s.name} className="panel rounded-[1.75rem] p-7">
                 <span className="grid size-9 place-items-center rounded-full bg-b-cobalt text-[0.9375rem] font-medium tabular-nums text-white">{i + 1}</span>

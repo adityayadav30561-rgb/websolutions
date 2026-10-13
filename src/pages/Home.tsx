@@ -172,7 +172,7 @@ function Hero() {
       <div {...hold} className="min-h-0 lg:col-span-4 lg:col-start-7 lg:[overflow-y:clip]">
         <motion.ul
           ref={listRef}
-          className="hero-wheel relative flex flex-col gap-10 lg:mx-auto lg:block lg:h-full lg:w-[min(100%,calc((100svh-10rem)*0.66))]"
+          className="hero-wheel swipe-row relative flex flex-col gap-10 lg:mx-auto lg:block lg:h-full lg:w-[min(100%,calc((100svh-10rem)*0.66))]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1.2, delay: 0.35 }}
@@ -238,7 +238,7 @@ const fact = (p: Project): [string, string] => (p.kind === "app" ? ["Runs on", p
 function WorkRow({ p, flip }: { p: Project; flip: boolean }) {
   const [label, value] = fact(p);
   return (
-    <motion.article {...reveal} className="grid grid-cols-1 items-center gap-8 border-t border-b-line py-10 md:grid-cols-12 md:gap-6 md:py-14">
+    <motion.article {...reveal} className="grid grid-cols-1 items-start gap-6 border-b-line max-md:content-start md:items-center md:gap-6 md:border-t md:py-14 md:grid-cols-12">
       <Link to={`/work/${p.slug}`} aria-label={p.name} className={`group block md:col-span-7 md:row-start-1 ${flip ? "md:col-start-6" : "md:col-start-1"}`}>
         <ProjectVisual p={p} />
       </Link>
@@ -276,7 +276,7 @@ function Work() {
   return (
     <section id="work" className="px-4 pt-12 md:px-8 md:pt-28">
       <SectionHead title="Websites, apps and search results we have shipped." note="A few recent projects. Every site and app here scrolls the way a visitor would." />
-      <div className="border-b border-b-line">
+      <div className="swipe-row border-b-line md:border-b">
         {rows.map((p, i) => (
           <WorkRow key={p.slug} p={p} flip={i % 2 === 1} />
         ))}
@@ -311,12 +311,12 @@ function ClientWords() {
   return (
     <section id="clients" className="px-4 pt-24 md:px-8 lg:pt-24">
       <SectionHead title="What clients say after we ship." note="The people who hired us, in their own words." />
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-12 md:gap-5">
+      <div className="swipe-row grid grid-cols-1 gap-4 md:grid-cols-12 md:gap-5">
         <motion.figure {...reveal} className="flex flex-col justify-between rounded-[1.75rem] bg-b-fog p-7 md:col-span-7 md:p-12">
           <blockquote className="text-[clamp(1.4rem,2.4vw,2.2rem)] font-medium leading-[1.25] tracking-[-0.02em]">“{lead.quote}”</blockquote>
           {by(lead)}
         </motion.figure>
-        <div className="grid grid-cols-1 gap-4 md:col-span-5 md:gap-5">
+        <div className="grid grid-cols-1 gap-4 max-md:contents md:col-span-5 md:gap-5">
           {rest.map((t, i) => (
             <motion.figure key={t.name} {...reveal} transition={{ ...reveal.transition, delay: 0.08 * (i + 1) }} className="flex flex-col justify-between rounded-[1.75rem] bg-b-fog p-7">
               <blockquote className="text-[1.0625rem] leading-relaxed">“{t.quote}”</blockquote>
@@ -568,14 +568,14 @@ function Services() {
   return (
     <section id="services" className="px-4 pt-24 md:px-8 md:pt-36">
       <SectionHead title="Six things we do, shown rather than described." note="Each panel is a small working piece of the service, not an icon." />
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-12 md:gap-5">
+      <div className="swipe-row grid grid-cols-1 gap-4 md:grid-cols-12 md:gap-5">
         {services.map((s, i) => {
           const d = demos[s.id];
           return (
-            <motion.article key={s.id} {...reveal} transition={{ ...reveal.transition, delay: (i % 3) * 0.07 }} className={`panel overflow-hidden rounded-[1.5rem] ${d.span}`}>
+            <motion.article key={s.id} {...reveal} transition={{ ...reveal.transition, delay: (i % 3) * 0.07 }} className={`panel flex flex-col overflow-hidden rounded-[1.5rem] ${d.span}`}>
               {/* The demo is a little interface of its own, so it keeps its light surface inside the panel. */}
               <div className={`keep-light overflow-hidden text-b-ink ${d.height}`}>{d.node}</div>
-              <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-t border-b-line/70 bg-b-white px-5 py-4">
+              <div className="flex flex-1 flex-wrap content-start items-baseline justify-between gap-x-6 gap-y-1 border-t border-b-line/70 bg-b-white px-5 py-4">
                 <h3 className="text-[1.0625rem] font-medium tracking-[-0.02em]">{s.name}</h3>
                 <p className="max-w-md text-[0.875rem] text-b-mute">{s.line}</p>
               </div>

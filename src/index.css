@@ -333,3 +333,40 @@ html[data-world="color"] .film-grain {
 @media (prefers-reduced-motion: reduce) {
   .vel-lean > *, .hero-wheel > * > * { transform: none !important; opacity: 1 !important; }
 }
+
+/* ───────────────────────── Phones: sideways instead of down ───────────────────────── */
+
+/*
+ * On a phone, a set of cards stacked one under another makes the page very long. A .swipe-row
+ * lays its children out as one row you swipe through, each card snapping into place with the
+ * next one peeking in from the right. From 768px up it does nothing and the normal grid applies.
+ */
+@media (max-width: 767px) {
+  .swipe-row {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 0.875rem;
+    /* Run to the screen edges past the page's 1rem gutter, so cards slide off the side rather than being cut short. */
+    margin-inline: -1rem;
+    padding-inline: 1rem;
+    scroll-padding-inline: 1rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .swipe-row::-webkit-scrollbar {
+    display: none;
+  }
+  .swipe-row > * {
+    flex: 0 0 84%;
+    min-width: 0;
+    scroll-snap-align: start;
+  }
+  /* Phone-shaped things: two and a bit to a screen. */
+  .swipe-narrow > * {
+    flex-basis: 44%;
+  }
+}

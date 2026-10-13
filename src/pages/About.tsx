@@ -79,7 +79,7 @@ export default function About() {
 
         <section className="pt-24 md:pt-36">
           <Head title="How a project runs." note="The same four stages every time, so you always know where things stand." />
-          <ol className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
+          <ol className="swipe-row grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
             {steps.map((s) => (
               <motion.li key={s.n} {...reveal} transition={{ ...reveal.transition, delay: (s.n - 1) * 0.07 }} className="panel flex flex-col rounded-[1.75rem] p-7">
                 <span className="grid size-9 place-items-center rounded-full bg-b-cobalt text-[0.9375rem] font-medium tabular-nums text-white">{s.n}</span>
@@ -112,7 +112,7 @@ export default function About() {
 
         <section className="pt-24 md:pt-36">
           <Head title="Some of the work." note="One of each: a website, an app and a search campaign." />
-          <div className="grid grid-cols-1 gap-x-5 gap-y-10 md:grid-cols-3">
+          <div className="swipe-row grid grid-cols-1 gap-x-5 gap-y-10 md:grid-cols-3">
             {shown.map((p) => (
               <motion.div key={p.slug} {...reveal}>
                 <Link to={`/work/${p.slug}`} className="group block">
