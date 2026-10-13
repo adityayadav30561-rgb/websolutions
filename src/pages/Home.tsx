@@ -8,8 +8,8 @@ import { EASE, Wordmark } from "../components/Shared";
 import { AppPhone, ProjectVisual, SiteFrame } from "../components/Shots";
 import { photos } from "../content/media";
 import { agency, faqs, mailto, services, steps, testimonials } from "../content/site";
-import { featured, heroWorks, projects, sitePages, type Project } from "../content/work";
-import { useMediaQuery, usePointerParallax } from "../lib/hooks";
+import { featured, heroWorks, phoneHero, phoneWork, projects, sitePages, type Project } from "../content/work";
+import { useCycle, useMediaQuery, usePointerParallax } from "../lib/hooks";
 
 /* Northlight homepage. White, fog and cobalt; the work is the imagery. */
 
@@ -65,13 +65,59 @@ function HeroWork({ p, eager }: { p: Project; eager?: boolean }) {
 }
 
 /**
+ * The hero's work on a phone: one piece at a time, changing by itself, with dots to pick one.
+ * All pieces are stacked in a box of fixed shape, so the page does not jump as they change.
+ */
+function HeroReel() {
+  const [i, setI] = useCycle(phoneHero.length, 4200);
+  const current = phoneHero[i];
+  return (
+    <div>
+      <div className="relative aspect-[16/10.7]">
+        {phoneHero.map((p, n) => (
+          <Link
+            key={p.slug}
+            to={`/work/${p.slug}`}
+            aria-label={p.name}
+            aria-hidden={n !== i}
+            tabIndex={n === i ? 0 : -1}
+            className={`absolute inset-0 block transition-[opacity,transform] duration-700 ease-out-expo ${n === i ? "opacity-100" : "pointer-events-none translate-y-3 opacity-0"}`}
+          >
+            {p.kind === "app" ? (
+              <div className="relative h-full overflow-hidden rounded-[0.625rem]" style={{ background: p.tint.bg }}>
+                <AppPhone app={p} eager className="absolute left-1/2 top-[9%] w-[34%] -translate-x-1/2" />
+              </div>
+            ) : (
+              <SiteFrame p={p} eager />
+            )}
+          </Link>
+        ))}
+      </div>
+      <div className="mt-4 flex items-center justify-between gap-4">
+        <Link to={`/work/${current.slug}`} className="min-w-0">
+          <span className="block truncate text-[1.0625rem] font-medium">{current.name}</span>
+          <span className="block truncate text-[0.8125rem] text-b-mute">{current.category}</span>
+        </Link>
+        <div role="tablist" aria-label="Featured work" className="flex shrink-0 items-center gap-1">
+          {phoneHero.map((p, n) => (
+            <button key={p.slug} type="button" role="tab" aria-selected={n === i} aria-label={`Show ${p.name}`} onClick={() => setI(n)} className="grid h-8 place-items-center px-1">
+              <span className={`block h-1.5 rounded-full transition-all duration-500 ${n === i ? "w-6 bg-b-amber" : "w-1.5 bg-b-ink/30"}`} />
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
  * Type on the left, a wheel of live work in the middle, an index at the edge.
  *
  * The wheel is endless. Each piece has a slot relative to the active one (-1 above, 0 centred,
  * 1 below, 2 waiting out of sight); when a piece leaves the top it reappears at the bottom,
  * moved there instantly while it is hidden. The centred piece faces the viewer and its
  * neighbours roll away and fade (see .hero-wheel in index.css). It turns on its own, and the
- * index picks a piece directly. Below the desktop breakpoint it is a plain list.
+ * index picks a piece directly. Below the desktop breakpoint HeroReel takes its place.
  */
 function Hero() {
   const wide = useMediaQuery("(min-width: 1024px)");
@@ -169,10 +215,12 @@ function Hero() {
         </motion.dl>
       </div>
 
+      {!wide && <HeroReel />}
+      {wide && (
       <div {...hold} className="min-h-0 lg:col-span-4 lg:col-start-7 lg:[overflow-y:clip]">
         <motion.ul
           ref={listRef}
-          className="hero-wheel swipe-row relative flex flex-col gap-10 lg:mx-auto lg:block lg:h-full lg:w-[min(100%,calc((100svh-10rem)*0.66))]"
+          className="hero-wheel relative lg:mx-auto lg:block lg:h-full lg:w-[min(100%,calc((100svh-10rem)*0.66))]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1.2, delay: 0.35 }}
@@ -184,9 +232,9 @@ function Hero() {
               <motion.li
                 key={p.slug}
                 aria-current={i === active || undefined}
-                className={wide ? "absolute inset-x-0 top-1/2" : ""}
+                className="absolute inset-x-0 top-1/2"
                 initial={false}
-                animate={{ y: wide ? slots[i] * step.pitch - step.item / 2 : 0 }}
+                animate={{ y: slots[i] * step.pitch - step.item / 2 }}
                 transition={wraps || !step.item ? { duration: 0 } : { duration: 1.3, ease: EASE }}
               >
                 <HeroWork p={p} eager />
@@ -195,6 +243,7 @@ function Hero() {
           })}
         </motion.ul>
       </div>
+      )}
 
       <nav aria-label="Featured work" {...hold} className="hidden text-right text-[0.9375rem] lg:col-span-2 lg:col-start-11 lg:flex lg:flex-col lg:justify-center">
         <span className="mb-2 text-[0.8125rem] text-b-mute">Index</span>
@@ -234,33 +283,47 @@ const reveal = {
 /** The one fact worth a line under each kind of project. */
 const fact = (p: Project): [string, string] => (p.kind === "app" ? ["Runs on", p.platforms] : p.kind === "seo" ? ["Measured", p.period] : ["Live at", p.link.label]);
 
-/** One project: its live visual on one side, what it is on the other. Sides alternate down the list. */
+/**
+ * One project: its live visual on one side, what it is on the other. Sides alternate down the list.
+ * On a phone these sit in a swipe row, so every card is built to the same shape: one-line name,
+ * two-line description, one fact, and the button pinned to the bottom.
+ */
 function WorkRow({ p, flip }: { p: Project; flip: boolean }) {
   const [label, value] = fact(p);
+  const seo = p.kind === "seo";
   return (
-    <motion.article {...reveal} className="grid grid-cols-1 items-start gap-6 border-b-line max-md:content-start md:items-center md:gap-6 md:border-t md:py-14 md:grid-cols-12">
+    <motion.article {...reveal} className="flex flex-col gap-6 border-b-line md:grid md:grid-cols-12 md:items-center md:gap-6 md:border-t md:py-14">
       <Link to={`/work/${p.slug}`} aria-label={p.name} className={`group block md:col-span-7 md:row-start-1 ${flip ? "md:col-start-6" : "md:col-start-1"}`}>
         <ProjectVisual p={p} />
       </Link>
-      <div className={`md:col-span-4 md:row-start-1 ${flip ? "md:col-start-1" : "md:col-start-9"}`}>
-        <p className="text-[0.875rem] text-b-mute">{p.category}</p>
-        <h3 className="mt-3 text-[clamp(1.8rem,2.8vw,2.6rem)] font-semibold leading-none tracking-[-0.035em]">
+      <div className={`flex flex-1 flex-col md:block md:col-span-4 md:row-start-1 ${flip ? "md:col-start-1" : "md:col-start-9"}`}>
+        <p className="truncate text-[0.875rem] text-b-mute">{p.category}</p>
+        <h3 className="mt-3 text-[clamp(1.375rem,2.8vw,2.6rem)] font-semibold leading-[1.1] tracking-[-0.035em] max-md:truncate md:leading-none">
           <Link to={`/work/${p.slug}`} className="decoration-2 underline-offset-4 hover:underline">
             {p.name}
           </Link>
         </h3>
-        <p className="mt-4 max-w-sm text-[1rem] leading-relaxed text-b-mute">{p.line}</p>
-        {p.kind === "seo" && (
-          <p className="mt-6 flex items-baseline gap-3">
+        <p className="mt-4 max-w-sm text-[1rem] leading-relaxed text-b-mute max-md:line-clamp-2 max-md:min-h-[2lh]">{p.line}</p>
+        {seo && (
+          <p className="mt-6 hidden items-baseline gap-3 md:flex">
             <span className="text-[clamp(2.4rem,4vw,3.6rem)] font-semibold leading-none tracking-[-0.04em] text-b-amber">{p.metric}</span>
             <span className="text-[0.9375rem] text-b-mute">{p.metricLabel}</span>
           </p>
         )}
-        <dl className="mt-6 flex max-w-sm justify-between gap-6 border-t border-b-line pt-3 text-[0.875rem]">
-          <dt className="shrink-0 text-b-mute">{label}</dt>
-          <dd className="text-right">{value}</dd>
+        <dl className="mt-6 flex max-w-sm justify-between gap-6 border-t border-b-line pt-3 text-[0.875rem] max-md:min-h-[calc(2lh+0.75rem)]">
+          {/* A phone has no room for the big figure, so a search project's fact becomes its result. */}
+          <dt className={`shrink-0 text-b-mute ${seo ? "max-md:hidden" : ""}`}>{label}</dt>
+          <dd className={`text-right ${seo ? "max-md:hidden" : ""}`}>{value}</dd>
+          {seo && (
+            <>
+              <dt className="shrink-0 text-b-mute md:hidden">Result</dt>
+              <dd className="text-right font-medium text-b-amber md:hidden">
+                {p.metric} {p.metricLabel}
+              </dd>
+            </>
+          )}
         </dl>
-        <div className="mt-6">
+        <div className="mt-6 max-md:mt-auto max-md:pt-6">
           <Button href={`/work/${p.slug}`} kind="ghost">
             View project
           </Button>
@@ -272,7 +335,9 @@ function WorkRow({ p, flip }: { p: Project; flip: boolean }) {
 
 /** A handful of projects; the full list lives at /work. Rows are filled from `featured`. */
 function Work() {
-  const rows = [featured.leadWebsite, featured.search, featured.appWithTabs, featured.website, featured.app];
+  // A phone's hero already shows three of these, so its row carries other projects.
+  const wide = useMediaQuery("(min-width: 768px)");
+  const rows = wide ? [featured.leadWebsite, featured.search, featured.appWithTabs, featured.website, featured.app] : phoneWork;
   return (
     <section id="work" className="px-4 pt-12 md:px-8 md:pt-28">
       <SectionHead title="Websites, apps and search results we have shipped." note="A few recent projects. Every site and app here scrolls the way a visitor would." />

@@ -379,3 +379,10 @@ export const featured = {
 
 /** The column of work in the hero, top to bottom. */
 export const heroWorks: Project[] = [find("sitco-india", "web"), find("khadi-organique", "seo"), find("toys-cartel", "app"), find("ashville-homes", "web")];
+
+/**
+ * Phones. The hero shows one piece at a time, one of each kind of work; the work row below it
+ * then shows different projects, so nothing appears twice on the way down the page.
+ */
+export const phoneHero: Project[] = [find("sitco-india", "web"), find("toys-cartel", "app"), find("khadi-organique", "seo")];
+export const phoneWork: Project[] = [find("maharishi-ayurveda", "app"), find("ashville-homes", "web"), find("badowl", "seo"), find("hues-boutique-hotel", "web"), find("event-intelligence-india", "app")];
