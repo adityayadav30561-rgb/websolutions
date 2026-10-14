@@ -370,3 +370,48 @@ html[data-world="color"] .film-grain {
     flex-basis: 44%;
   }
 }
+
+/* ───────────────────────── About page ───────────────────────── */
+
+/* An endless drifting row. Its content is laid out twice, so moving it by half its width loops cleanly. */
+.marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 80s linear infinite;
+}
+.marquee:hover {
+  animation-play-state: paused;
+}
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+/* Lets a full-width row fade out at both edges of the screen. */
+.edge-fade {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+}
+/* A panel that is stacked on top of other panels cannot be see-through. */
+html[data-world="color"] .panel-solid {
+  background: linear-gradient(150deg, #0f2a70, #07133d);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* Sound button: the bars rise and fall while music plays. */
+.sound-bar {
+  transition: height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sound-bar.is-on {
+  animation: sound-bar 0.9s ease-in-out infinite alternate;
+  transform-origin: center;
+}
+@keyframes sound-bar {
+  from {
+    transform: scaleY(0.35);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}

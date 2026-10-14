@@ -7,6 +7,7 @@ import Home from "./pages/Home";
 import WorkDetail from "./pages/WorkDetail";
 import WorkIndex from "./pages/WorkIndex";
 import { startSmoothScroll } from "./lib/scroll";
+import { startSound } from "./lib/sound";
 import { startReactiveContent } from "./world/react";
 import { WorldProvider } from "./world/World";
 
@@ -30,6 +31,7 @@ function ScrollReset() {
 }
 
 export default function App() {
+  useEffect(() => startSound(), []);
   useEffect(() => {
     // Inertial scrolling and cursor-reactive content, unless the visitor asked for less motion.
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;

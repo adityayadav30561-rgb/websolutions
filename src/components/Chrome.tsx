@@ -4,6 +4,7 @@ import { MobileMenu, SiteLink, Wordmark } from "./Shared";
 import { agency, mailto, navLinks, socials } from "../content/site";
 import { useScrolled } from "../lib/hooks";
 import { WorldToggle } from "../world/World";
+import { SoundToggle } from "../lib/sound";
 
 /* Site chrome shared by the homepage and the work pages. */
 
@@ -52,6 +53,7 @@ export function Nav() {
           ))}
         </nav>
         <div className="flex items-center gap-1">
+          <SoundToggle />
           <WorldToggle />
           <Link to="/contact" className="hidden h-10 items-center rounded-full bg-b-cobalt px-5 text-[0.9375rem] font-medium text-white transition-colors duration-300 hover:bg-[#1a30d6] md:inline-flex">
             Start a project
