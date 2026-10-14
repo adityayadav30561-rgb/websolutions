@@ -125,6 +125,16 @@ export const projects: Project[] = [
     link: { href: "https://laundry-three-gamma.vercel.app/", label: "laundry-three-gamma.vercel.app" },
   }),
   web({
+    folder: "vana",
+    slug: "vana",
+    name: "Vana",
+    category: "Studio website",
+    line: "A digital studio's site, told as a walk through a forest.",
+    summary: "A website for Vana, an independent digital studio for SEO, websites, Android and iOS apps, and custom software. The page is one journey from the sky down through the canopy, with sound.",
+    tint: { bg: "#dde7dc", fg: "dark" },
+    link: { href: "https://vana-blond.vercel.app/", label: "vana-blond.vercel.app" },
+  }),
+  web({
     folder: "blueorbit",
     slug: "blue-orbit-digi",
     name: "Blue Orbit Digi",

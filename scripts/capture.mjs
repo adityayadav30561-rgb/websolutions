@@ -2,7 +2,7 @@
 // Uses the Chrome already installed on this machine (no browser download).
 //   node scripts/capture.mjs             capture everything
 //   node scripts/capture.mjs sitco khadi  capture only these folders
-import { mkdir } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import puppeteer from "puppeteer-core";
@@ -27,6 +27,8 @@ const targets = {
   kshipra: { url: "https://kshiprahealth.com/", shots: page() },
   hues: { url: "https://huesboutiquehotel.com/", shots: page() },
   ashville: { url: "https://www.ashvillebaga.com/", shots: page() },
+  // Vana paints its scene on a fixed canvas and reveals sections as you scroll, so it is stitched.
+  vana: { url: "https://vana-blond.vercel.app/", shots: page().map((s) => ({ ...s, stitch: true })) },
   // Search clients: full pages sit beside the supplied desktop/mobile stills
   khadi: { url: "https://khadiorganique.com/", shots: page(["page", "page-mobile"]) },
   badowl: { url: "https://badowl.in/", shots: page(["page", "page-mobile"]) },
@@ -43,6 +45,89 @@ const chrome = ["C:/Program Files/Google/Chrome/Application/chrome.exe", "C:/Pro
 if (!chrome) throw new Error("No Chrome or Edge found");
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/*
+ * A page whose look depends on where it is scrolled to (a fixed WebGL scene, sections that
+ * animate in) comes out half-empty in one tall screenshot. So scroll it for real, a screen at a
+ * time, photograph each screen once it settles, and join them. Neighbouring screens overlap and
+ * are cross-faded there, so the moving background does not leave a hard line at each join.
+ * Fixed bars (the header) are hidden after the first screen, or they would repeat down the image.
+ */
+const OVERLAP = 140;
+const MAX_PX = 16000; // WebP cannot be taller than 16383
+async function stitched(tab, viewport, file) {
+  const total = await tab.evaluate(() => document.documentElement.scrollHeight);
+  const step = viewport.height - OVERLAP;
+  const stops = [];
+  for (let y = 0; y < total - viewport.height; y += step) stops.push(y);
+  stops.push(Math.max(total - viewport.height, 0));
+  const tiles = [];
+  for (const [n, y] of stops.entries()) {
+    await tab.evaluate((y) => window.scrollTo(0, y), y);
+    await wait(1500);
+    if (n === 1) {
+      await tab.evaluate(() => {
+        for (const el of document.querySelectorAll("body *")) {
+          if (getComputedStyle(el).position !== "fixed" || el.tagName === "CANVAS" || el.querySelector("canvas")) continue;
+          if (el.getBoundingClientRect().height < innerHeight * 0.6) el.style.setProperty("visibility", "hidden", "important");
+        }
+      });
+      await wait(200);
+    }
+    tiles.push({ y: await tab.evaluate(() => Math.round(scrollY)), data: await tab.screenshot({ type: "png", encoding: "base64" }) });
+  }
+  // Join them on a canvas in a blank tab.
+  const dpr = viewport.deviceScaleFactor;
+  const scale = Math.min(1, MAX_PX / (total * dpr));
+  const sheet = await tab.browser().newPage();
+  try {
+    const webp = await sheet.evaluate(
+      async (tiles, w, h, dpr, scale, overlap) => {
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(w * dpr * scale);
+        canvas.height = Math.round(h * dpr * scale);
+        const ctx = canvas.getContext("2d");
+        ctx.scale(scale, scale);
+        let prevEnd = 0;
+        for (const t of tiles) {
+          const img = new Image();
+          img.src = "data:image/png;base64," + t.data;
+          await img.decode();
+          const top = t.y * dpr;
+          const fade = Math.min(overlap * dpr, Math.max(prevEnd - top, 0));
+          const piece = document.createElement("canvas");
+          piece.width = img.width;
+          piece.height = img.height;
+          const pc = piece.getContext("2d");
+          pc.drawImage(img, 0, 0);
+          if (fade > 0) {
+            // Everything above the fade is already on the sheet from the screen before.
+            const g = pc.createLinearGradient(0, prevEnd - top - fade, 0, prevEnd - top);
+            g.addColorStop(0, "rgba(0,0,0,0)");
+            g.addColorStop(1, "rgba(0,0,0,1)");
+            pc.globalCompositeOperation = "destination-in";
+            pc.fillStyle = g;
+            // The mask applies to the whole piece: clear above the fade, solid below it.
+            pc.fillRect(0, 0, piece.width, piece.height);
+          }
+          ctx.drawImage(piece, 0, top);
+          prevEnd = top + img.height;
+        }
+        return canvas.toDataURL("image/webp", 0.76).split(",")[1];
+      },
+      tiles,
+      viewport.width,
+      total,
+      dpr,
+      scale,
+      OVERLAP,
+    );
+    await writeFile(file, Buffer.from(webp, "base64"));
+  } finally {
+    await sheet.close();
+  }
+  return total;
+}
 const only = process.argv.slice(2);
 const browser = await puppeteer.launch({ executablePath: chrome, headless: true, args: ["--hide-scrollbars"] });
 
@@ -50,7 +135,7 @@ for (const [folder, { url, shots }] of Object.entries(targets)) {
   if (only.length && !only.includes(folder)) continue;
   const dir = path.join("public", "work", folder);
   await mkdir(dir, { recursive: true });
-  for (const { out, viewport, max, fixed } of shots) {
+  for (const { out, viewport, max, fixed, stitch } of shots) {
     const tab = await browser.newPage();
     tab.setDefaultTimeout(45000);
     try {
@@ -82,6 +167,11 @@ for (const [folder, { url, shots }] of Object.entries(targets)) {
           })
           .catch(() => wait(4000)); // page reloaded itself mid-walk; capture what settles
         await wait(1500);
+        if (stitch) {
+          height = await stitched(tab, viewport, path.join(dir, `${out}.webp`));
+          console.log(`${folder}/${out}: ${viewport.width}x${height} (stitched)`);
+          continue;
+        }
         height = Math.min(await tab.evaluate(() => document.documentElement.scrollHeight), max);
       }
       // A page that never settles must not stall the whole run.

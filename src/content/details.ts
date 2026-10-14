@@ -222,6 +222,11 @@ export const webDetails: Record<string, WebDetail> = {
     cta: "Book a pickup",
     sections: ["Soft, fresh and folded — back in 24–48 hours.", "Laundry done the way you would do it at home", "Eight services, one shop", "Four steps, no waiting at a counter", "Packages worth starting on", "What people in Daliganj say", "The shop in Daliganj"],
   },
+  vana: {
+    pages: ["Home", "About", "Experience", "Services", "Work", "Journey", "Contact"],
+    cta: "Start a project",
+    sections: ["Where ideas find their way.", "Every journey begins with a step.", "Purpose behind every detail.", "What we create", "Work that takes root.", "The journey", "Beautiful work should move people.", "Some journeys are worth beginning."],
+  },
   "blue-orbit-digi": {
     pages: ["Services", "Pricing", "About", "Contact"],
     cta: "Get a quote",
