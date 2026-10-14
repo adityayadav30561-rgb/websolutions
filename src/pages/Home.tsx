@@ -7,8 +7,8 @@ import { BrowserFrame, StoreMock } from "../components/Mockups";
 import { EASE, Wordmark } from "../components/Shared";
 import { AppPhone, ProjectVisual, SiteFrame } from "../components/Shots";
 import { photos } from "../content/media";
-import { agency, faqs, mailto, services, steps, testimonials } from "../content/site";
-import { featured, heroWorks, phoneHero, phoneWork, projects, sitePages, type Project } from "../content/work";
+import { agency, faqs, mailto, services, steps, testimonials, totals, totalsLine } from "../content/site";
+import { featured, heroWorks, phoneHero, phoneWork, sitePages, type Project } from "../content/work";
 import { useCycle, useMediaQuery, usePointerParallax } from "../lib/hooks";
 
 /* Northlight homepage. White, fog and cobalt; the work is the imagery. */
@@ -42,8 +42,6 @@ function Layer({ px, py, depth, delay, className, children }: { px: MotionValue<
     </motion.div>
   );
 }
-
-const counts = (["web", "app", "seo"] as const).map((k) => ({ n: projects.filter((p) => p.kind === k).length, label: { web: "websites built", app: "apps shipped", seo: "search campaigns" }[k] }));
 
 /** One piece of work in the hero column: a site scrolling in its browser, or an app in its phone. */
 function HeroWork({ p, eager }: { p: Project; eager?: boolean }) {
@@ -206,10 +204,10 @@ function Hero() {
         </div>
 
         <motion.dl className="flex gap-8" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.9, delay: 0.9 }}>
-          {counts.map((c) => (
+          {totals.map((c) => (
             <div key={c.label}>
               <dt className="text-[0.8125rem] text-b-mute">{c.label}</dt>
-              <dd className="mt-1 text-[1.0625rem] font-medium tabular-nums text-b-amber">{c.n}</dd>
+              <dd className="mt-1 text-[1.0625rem] font-medium tabular-nums text-b-amber">{c.n}+</dd>
             </div>
           ))}
         </motion.dl>
@@ -253,7 +251,7 @@ function Hero() {
           </Link>
         ))}
         <Link to="/work" className="mt-3 py-0.5 text-b-amber decoration-1 underline-offset-4 hover:underline">
-          All {projects.length} projects
+          All selected work
         </Link>
         {/* A small still of the active piece, as a contact sheet would show it */}
         <Link to={`/work/${current.slug}`} aria-label={current.name} className="keep-light mt-8 block aspect-[16/10] overflow-hidden bg-b-fog">
@@ -340,7 +338,7 @@ function Work() {
   const rows = wide ? [featured.leadWebsite, featured.search, featured.appWithTabs, featured.website, featured.app] : phoneWork;
   return (
     <section id="work" className="px-4 pt-12 md:px-8 md:pt-28">
-      <SectionHead title="Websites, apps and search results we have shipped." note="A few recent projects. Every site and app here scrolls the way a visitor would." />
+      <SectionHead title="Websites, apps and search results we have shipped." note={`A selection from ${totalsLine}. Every site and app here scrolls the way a visitor would.`} />
       <div className="swipe-row border-b-line md:border-b">
         {rows.map((p, i) => (
           <WorkRow key={p.slug} p={p} flip={i % 2 === 1} />
@@ -348,7 +346,7 @@ function Work() {
       </div>
       <div className="mt-10 flex justify-center">
         <Button href="/work" kind="ghost">
-          See all {projects.length} projects
+          See all selected work
         </Button>
       </div>
     </section>
@@ -378,7 +376,7 @@ function ClientWords() {
       <SectionHead title="What clients say after we ship." note="The people who hired us, in their own words." />
       <div className="swipe-row grid grid-cols-1 gap-4 md:grid-cols-12 md:gap-5">
         <motion.figure {...reveal} className="flex flex-col justify-between rounded-[1.75rem] bg-b-fog p-7 md:col-span-7 md:p-12">
-          <blockquote className="text-[clamp(1.4rem,2.4vw,2.2rem)] font-medium leading-[1.25] tracking-[-0.02em]">“{lead.quote}”</blockquote>
+          <blockquote className="text-[clamp(1.25rem,1.9vw,1.75rem)] font-medium leading-[1.3] tracking-[-0.02em]">“{lead.quote}”</blockquote>
           {by(lead)}
         </motion.figure>
         <div className="grid grid-cols-1 gap-4 max-md:contents md:col-span-5 md:gap-5">
@@ -390,7 +388,6 @@ function ClientWords() {
           ))}
         </div>
       </div>
-      {import.meta.env.DEV && <p className="mt-4 text-[0.8125rem] text-b-mute">Placeholder quotes and names. Replace in src/content/site.ts before launch. (This note only shows in development.)</p>}
     </section>
   );
 }

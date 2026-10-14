@@ -4,6 +4,7 @@ import { Footer, Nav } from "../components/Chrome";
 import { PhoneFrame } from "../components/Mockups";
 import { AppPhone, SiteFrame } from "../components/Shots";
 import { kindLabel, projects, type Project } from "../content/work";
+import { totalsLine } from "../content/site";
 import { velRef } from "../lib/scroll";
 
 /* Every project, filterable by kind. */
@@ -63,7 +64,7 @@ export default function WorkIndex() {
       <main className="px-4 pt-28 md:px-8 md:pt-40">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <h1 className="text-[clamp(2.6rem,6vw,5rem)] font-medium leading-none tracking-[-0.05em]">Work</h1>
-          <p className="max-w-sm text-[0.9375rem] leading-relaxed text-b-mute">Websites we built, apps we shipped and search campaigns we ran. Open any project for screenshots and the detail.</p>
+          <p className="max-w-sm text-[0.9375rem] leading-relaxed text-b-mute">A selection from {totalsLine}. Open any one for screenshots and the detail.</p>
         </div>
 
         <div role="tablist" aria-label="Filter work" className="no-scrollbar mt-10 flex gap-2 overflow-x-auto">

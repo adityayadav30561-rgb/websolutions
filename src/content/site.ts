@@ -56,27 +56,36 @@ export const projects: Project[] = [
 
 export const conceptNote = "Concept projects shown for illustration.";
 
+/**
+ * How much work the studio has done in total. The site shows only a selection of it,
+ * so these are the studio's own figures, not counts of the projects listed here.
+ */
+export const totals = [
+  { n: 20, label: "websites built" },
+  { n: 10, label: "apps developed" },
+  { n: 50, label: "SEO, AEO and GEO projects" },
+];
+/** The same figures in a sentence: "20+ websites, 10+ apps and 50+ SEO, AEO and GEO projects". */
+export const totalsLine = `${totals[0].n}+ websites, ${totals[1].n}+ apps and ${totals[2].n}+ SEO, AEO and GEO projects`;
+
 export type Testimonial = { quote: string; name: string; role: string };
 
-/**
- * PLACEHOLDER. These quotes, names and roles are invented stand-ins so the section can be
- * designed. Replace every entry with a real client's words (with their permission) before launch.
- */
+/** Clients in their own words. */
 export const testimonials: Testimonial[] = [
   {
-    quote: "They asked more questions in the first week than our last agency did in a year. The site went live on the date they gave us, and enquiries started coming through it the same month.",
-    name: "Client Name",
-    role: "Founder, Company Name",
+    quote: "Working with the team has been a great experience. They handled our website development and SEO with a clear understanding of our goals. We’ve continued working with them because of their consistent support, attention to detail, and commitment to delivering results.",
+    name: "KamaHealth",
+    role: "Website development and SEO",
   },
   {
-    quote: "We could open the real thing on our phones from the second week. Nothing was a surprise at launch.",
-    name: "Client Name Two",
-    role: "Operations lead, Company Name",
+    quote: "We’ve partnered with the team across SEO, AEO, and GEO, and the experience has been consistently positive. They understand how search is evolving and take a thoughtful approach to improving our online visibility. It’s why we keep coming back for more.",
+    name: "Badowl",
+    role: "SEO, AEO and GEO",
   },
   {
-    quote: "The search reports are our own analytics, not a slide deck. We can check every number ourselves.",
-    name: "Client Name Three",
-    role: "Marketing manager, Company Name",
+    quote: "The team did an excellent job developing our e-commerce store, creating a smooth and user-friendly shopping experience. Their understanding of our requirements and willingness to support us beyond the initial project made the collaboration worthwhile. We’re happy to continue working with them.",
+    name: "Kshipra",
+    role: "E-commerce store",
   },
 ];
 

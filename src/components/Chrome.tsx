@@ -112,7 +112,7 @@ export function Footer() {
 
         <div className="col-span-2 md:col-span-2">
           <p className={heading}>Contact</p>
-          <a href={mailto} className="block py-1 text-b-amber decoration-1 underline-offset-4 hover:underline">
+          <a href={mailto} className="block py-1 text-b-amber decoration-1 underline-offset-4 [overflow-wrap:anywhere] hover:underline">
             {agency.email}
           </a>
           <p className="py-1 text-b-mute">{agency.location}</p>

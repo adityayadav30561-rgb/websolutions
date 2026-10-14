@@ -4,7 +4,7 @@ import { AnimatePresence, animate, motion, useInView, useScroll, useTransform, t
 import { Button, Footer, Nav } from "../components/Chrome";
 import { EASE } from "../components/Shared";
 import { AppPhone, ProjectVisual, SiteFrame } from "../components/Shots";
-import { agency, offerings, principles, steps } from "../content/site";
+import { agency, offerings, principles, steps, totals } from "../content/site";
 import { featured, find, projects } from "../content/work";
 import { useMediaQuery } from "../lib/hooks";
 import { useWorld } from "../world/World";
@@ -22,13 +22,6 @@ const reveal = {
   transition: { duration: 0.9, ease: EASE },
 };
 
-const count = (kind: "web" | "app" | "seo") => projects.filter((p) => p.kind === kind).length;
-const counts = [
-  { n: count("web"), label: "websites built" },
-  { n: count("app"), label: "apps shipped" },
-  { n: count("seo"), label: "search campaigns" },
-  { n: projects.length, label: "projects you can open" },
-];
 
 const sites = projects.filter((p) => p.kind === "web");
 const two = (n: number) => String(n).padStart(2, "0");
@@ -88,7 +81,7 @@ function Statement({ text }: { text: string }) {
   );
 }
 
-/** A figure that counts up the first time it is seen. */
+/** A figure that counts up the first time it is seen. The real number is always in the text for screen readers and search engines. */
 function Count({ n }: { n: number }) {
   const ref = useRef<HTMLSpanElement>(null);
   const seen = useInView(ref, { once: true, margin: "-10% 0px" });
@@ -100,7 +93,8 @@ function Count({ n }: { n: number }) {
   }, [seen, n]);
   return (
     <span ref={ref} className="tabular-nums">
-      {value}
+      <span className="sr-only">{n}</span>
+      <span aria-hidden>{value}</span>
     </span>
   );
 }
@@ -364,11 +358,11 @@ export default function About() {
           </div>
         </section>
 
-        <motion.dl {...reveal} className="mt-20 grid grid-cols-2 border-t border-b-line md:mt-28 lg:grid-cols-4">
-          {counts.map((c) => (
-            <div key={c.label} className="border-b border-b-line py-8 pr-4 md:py-12 lg:border-l lg:pl-8 lg:first:border-l-0 lg:first:pl-0">
+        <motion.dl {...reveal} className="mt-20 grid grid-cols-3 border-y border-b-line md:mt-28">
+          {totals.map((c) => (
+            <div key={c.label} className="border-l border-b-line py-8 pl-4 first:border-l-0 first:pl-0 md:py-12 md:pl-8">
               <dd className="text-[clamp(3rem,7vw,6rem)] font-semibold leading-none tracking-[-0.05em] text-b-amber">
-                <Count n={c.n} />
+                <Count n={c.n} />+
               </dd>
               <dt className="mt-3 text-[0.9375rem] text-b-mute">{c.label}</dt>
             </div>
@@ -397,7 +391,7 @@ export default function About() {
           </div>
           <div className="mt-10 flex justify-center">
             <Button href="/work" kind="ghost">
-              See all {projects.length} projects
+              See all selected work
             </Button>
           </div>
         </section>
