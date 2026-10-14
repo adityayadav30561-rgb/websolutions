@@ -2,7 +2,7 @@ import { useSyncExternalStore } from "react";
 
 /*
  * Background music. One track, of which only the opening CLIP_SECONDS play, fading in at the
- * start and out at the end. The site tries to start it on arrival; browsers refuse sound before
+ * start and out at the end, then starting over, for as long as the music is on. The site tries to start it on arrival; browsers refuse sound before
  * the visitor has touched the page, so in that case it starts on their first click, tap or key.
  * Turning it off is remembered, and then it never starts by itself.
  *
@@ -44,16 +44,16 @@ const remember = (on: boolean) => {
   }
 };
 
-/** Volume follows the position in the clip: a fade at each end. (iOS ignores volume; there it just stops.) */
-function shape() {
+/** Volume follows the position in the clip: a fade at each end, then back to the start. (iOS ignores volume.) */
+function level() {
   if (!audio) return;
   const t = audio.currentTime;
-  if (t >= CLIP_SECONDS) {
-    stop();
-    return;
-  }
-  const level = Math.min(1, t / FADE_IN, (CLIP_SECONDS - t) / FADE_OUT);
-  audio.volume = Math.max(0, level) * VOLUME;
+  if (t >= CLIP_SECONDS) audio.currentTime = 0;
+  audio.volume = Math.max(0, Math.min(1, t / FADE_IN, (CLIP_SECONDS - t) / FADE_OUT)) * VOLUME;
+}
+/* Smooth while the page is visible; a background tab stops animation frames, so "timeupdate" keeps it going there. */
+function shape() {
+  level();
   if (state === "playing") requestAnimationFrame(shape);
 }
 
@@ -92,7 +92,9 @@ export function startSound() {
   audio = new Audio(SRC);
   audio.preload = "auto";
   audio.addEventListener("error", () => set("unavailable"));
-  audio.addEventListener("ended", stop);
+  // The file may end before the clip does; loop it either way.
+  audio.loop = true;
+  audio.addEventListener("timeupdate", level);
   if (!wantsOff()) void play();
   return () => {
     GESTURES.forEach((g) => window.removeEventListener(g, onFirstGesture, true));
