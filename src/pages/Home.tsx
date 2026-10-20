@@ -376,10 +376,10 @@ function ClientWords() {
       <SectionHead title="What clients say after we ship." note="The people who hired us, in their own words." />
       <div className="swipe-row grid grid-cols-1 gap-4 md:grid-cols-12 md:gap-5">
         <motion.figure {...reveal} className="flex flex-col justify-between rounded-[1.75rem] bg-b-fog p-7 md:col-span-7 md:p-12">
-          <blockquote className="text-[clamp(1.25rem,1.9vw,1.75rem)] font-medium leading-[1.3] tracking-[-0.02em]">“{lead.quote}”</blockquote>
+          <blockquote className="text-[clamp(1.25rem,1.9vw,1.75rem)] font-medium leading-[1.3] tracking-[-0.02em] max-md:text-[1.0625rem] max-md:font-normal max-md:leading-relaxed max-md:tracking-normal">“{lead.quote}”</blockquote>
           {by(lead)}
         </motion.figure>
-        <div className="grid grid-cols-1 gap-4 max-md:contents md:col-span-5 md:gap-5">
+        <div className="swipe-group grid grid-cols-1 gap-4 md:col-span-5 md:gap-5">
           {rest.map((t, i) => (
             <motion.figure key={t.name} {...reveal} transition={{ ...reveal.transition, delay: 0.08 * (i + 1) }} className="flex flex-col justify-between rounded-[1.75rem] bg-b-fog p-7">
               <blockquote className="text-[1.0625rem] leading-relaxed">“{t.quote}”</blockquote>
@@ -808,15 +808,15 @@ function Process() {
       <div className={`grid grid-cols-1 gap-8 px-4 md:px-8 lg:grid-cols-12 ${pinned ? "sticky top-0 h-svh content-start items-start pt-36" : "items-center"}`}>
         <div className="lg:col-span-4">
           <h2 className="text-[clamp(2rem,3.6vw,3.2rem)] font-medium leading-[1.03] tracking-[-0.04em]">One product, four states.</h2>
-          <ol className="no-scrollbar mt-8 flex gap-2 overflow-x-auto lg:flex-col lg:gap-0">
+          <ol className="mt-8 grid grid-cols-4 gap-1.5 lg:flex lg:flex-col lg:gap-0">
             {steps.map((s, i) => {
               const on = i === step;
               return (
-                <li key={s.n} className="shrink-0 lg:border-t lg:border-b-line lg:last:border-b">
-                  <button type="button" onClick={() => go(i)} aria-current={on ? "step" : undefined} className={`flex w-full items-start gap-4 rounded-full px-4 py-2 text-left transition-colors max-lg:ring-1 max-lg:ring-b-line lg:rounded-none lg:px-0 lg:py-5 ${on ? "max-lg:bg-b-ink max-lg:text-b-paper" : "text-b-mute"}`}>
+                <li key={s.n} className="min-w-0 lg:border-t lg:border-b-line lg:last:border-b">
+                  <button type="button" onClick={() => go(i)} aria-current={on ? "step" : undefined} className={`flex w-full items-start gap-4 rounded-full px-2 py-2 text-left transition-colors max-lg:justify-center max-lg:text-center max-lg:ring-1 max-lg:ring-b-line lg:rounded-none lg:px-0 lg:py-5 ${on ? "max-lg:bg-b-ink max-lg:text-b-paper" : "text-b-mute"}`}>
                     <span className={`mt-0.5 grid size-6 shrink-0 place-items-center rounded-full text-[0.75rem] font-medium tabular-nums transition-colors max-lg:hidden ${on ? "bg-b-cobalt text-white" : "bg-b-fog"}`}>{s.n}</span>
                     <span>
-                      <span className={`block text-[1.0625rem] font-medium tracking-[-0.02em] transition-colors ${on ? "lg:text-b-ink" : ""}`}>{s.name}</span>
+                      <span className={`block truncate text-[0.875rem] font-medium tracking-[-0.02em] transition-colors sm:text-[1rem] lg:text-[1.0625rem] ${on ? "lg:text-b-ink" : ""}`}>{s.name}</span>
                       <span className={`hidden transition-[grid-template-rows,opacity] duration-500 lg:grid ${on ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
                         <span className="overflow-hidden">
                           <span className="block max-w-xs pt-1.5 text-[0.875rem] leading-relaxed text-b-mute">{s.line}</span>

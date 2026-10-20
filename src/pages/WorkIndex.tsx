@@ -67,7 +67,7 @@ export default function WorkIndex() {
           <p className="max-w-sm text-[0.9375rem] leading-relaxed text-b-mute">A selection from {totalsLine}. Open any one for screenshots and the detail.</p>
         </div>
 
-        <div role="tablist" aria-label="Filter work" className="no-scrollbar mt-10 flex gap-2 overflow-x-auto">
+        <div role="tablist" aria-label="Filter work" className="mt-10 flex flex-wrap gap-1.5 sm:gap-2">
           {filters.map((f) => (
             <button
               key={f}
@@ -75,7 +75,7 @@ export default function WorkIndex() {
               role="tab"
               aria-selected={filter === f}
               onClick={() => setFilter(f)}
-              className={`flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-[0.9375rem] font-medium transition-colors ${filter === f ? "bg-b-ink text-b-paper" : "bg-b-fog text-b-ink hover:bg-b-line"}`}
+              className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-[0.875rem] font-medium sm:gap-2 sm:px-4 sm:text-[0.9375rem] transition-colors ${filter === f ? "bg-b-ink text-b-paper" : "bg-b-fog text-b-ink hover:bg-b-line"}`}
             >
               {f === "all" ? "All" : kindLabel[f]}
               <span className="tabular-nums opacity-55">{count(f)}</span>

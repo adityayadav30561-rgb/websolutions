@@ -352,6 +352,9 @@ html[data-world="color"] .film-grain {
     padding-inline: 1rem;
     scroll-padding-inline: 1rem;
     overflow-x: auto;
+    /* A sideways scroller would otherwise also scroll up and down by the few pixels its cards
+       move as they reveal, and catch the thumb when the visitor only means to scroll the page. */
+    overflow-y: hidden;
     overscroll-behavior-x: contain;
     scroll-snap-type: x mandatory;
     scrollbar-width: none;
@@ -360,10 +363,15 @@ html[data-world="color"] .film-grain {
   .swipe-row::-webkit-scrollbar {
     display: none;
   }
-  .swipe-row > * {
+  .swipe-row > *,
+  .swipe-row > .swipe-group > * {
     flex: 0 0 84%;
     min-width: 0;
     scroll-snap-align: start;
+  }
+  /* A wrapper that groups cards on larger screens; on a phone its cards join the row. */
+  .swipe-row > .swipe-group {
+    display: contents;
   }
   /* Phone-shaped things: two and a bit to a screen. */
   .swipe-narrow > * {
@@ -414,4 +422,16 @@ html[data-world="color"] .panel-solid {
   to {
     transform: scaleY(1);
   }
+}
+
+/* Footer: a calm surface of its own, paper on the canvas and deep glass at night. */
+.footer-surface {
+  background: var(--color-b-fog);
+  border-top: 1px solid var(--color-b-line);
+}
+html[data-world="color"] .footer-surface {
+  background: linear-gradient(180deg, rgb(8 20 62 / 0.82), rgb(2 8 28 / 0.96));
+  border-top-color: rgb(255 255 255 / 0.12);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
 }
